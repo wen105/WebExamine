@@ -51,6 +51,7 @@ public class UserLoginServlet extends javax.servlet.http.HttpServlet {
             //添加cookie
             response.addCookie(autoCookie);
         }
+
         request.getSession().setAttribute("user", user);
         response.sendRedirect("/showData");
     }

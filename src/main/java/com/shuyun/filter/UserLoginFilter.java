@@ -15,8 +15,8 @@ import javax.servlet.http.HttpServletResponse;
  * Created by shuyun on 2016/8/4.
  * 登陆过滤器
  */
-@WebFilter(filterName="UserLoginFilter",urlPatterns={"/userLogin.jsp","/showData.jsp"})
-public class UserLoginFilter implements javax.servlet.Filter {
+@WebFilter(filterName = "UserLoginFilter", urlPatterns = {"/userLogin.jsp", "/showData.jsp"})
+public class UserLoginFilter implements Filter {
     public void destroy() {
     }
 
@@ -28,13 +28,16 @@ public class UserLoginFilter implements javax.servlet.Filter {
             return;
         }
 
-        Object object=request.getSession().getAttribute("user");
-        if(object!=null){
+        //如果session中有用户则进入主页
+        Object object = request.getSession().getAttribute("user");
+        System.out.println(request.getSession().getAttribute("user") == null);
+        if (object != null) {
             System.out.println("session中有值");
-            request.getRequestDispatcher("showData.jsp");
+            request.getRequestDispatcher("showData.jsp").forward(request, response);
             return;
         }
 
+        //如果session中没有用户，则判断cookie
         Cookie autoCookie = null;
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
@@ -43,39 +46,36 @@ public class UserLoginFilter implements javax.servlet.Filter {
                     autoCookie = cookie;
                 }
             }
-            //判断cookie是否为空
+            //判断cookie是否为空，如果为空则跳转到登录页面
             if (autoCookie == null) {
                 //如果cookie为空则继续执行userLogin.jsp页面
-                System.out.println("如果cookie为空则继续执行userLogin.jsp页面");
                 request.getRequestDispatcher("userLogin.jsp").forward(request, response);
                 return;
             }
-            //如果autoCookie不为null，则判断其值
+            //如果autoCookie不为null，则根据cookie值到数据库查找用户
             String value = autoCookie.getValue();
             String[] temp = value.split(":");
             String userName = temp[1];
-            System.out.println("autoCookie不为空时name=" + userName);
+
             //cookie没有失效,根据用户名查询用户信息
             UserDao userDao = new UserDaoImply();
             User user = userDao.queryUser(userName);
+            //如果没有查到用户，则跳转到登录页面
             if (user == null) {
                 System.out.println("filter里面如果没有查到用户则继续userLogin.jsp");
                 chain.doFilter(request, response);
                 return;
             }
-
-            System.out.println("满足cookie则跳转到成功登陆页面");
+            //如果满足cookie则跳转到登录页面
             request.getSession().setAttribute("user", user);
             request.getRequestDispatcher("./showData.jsp").forward(request, response);
 
         } else {
-            System.out.println("在没有cookie的情况下，继续userLogin.jsp");
             request.getRequestDispatcher("userLogin.jsp").forward(request, response);
         }
     }
 
     public void init(FilterConfig config) throws ServletException {
-
     }
 
 }

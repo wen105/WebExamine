@@ -10,7 +10,7 @@ import java.io.IOException;
  * Created by shuyun on 2016/8/5.
  * 对所有servlet的编码过滤
  */
-@WebFilter(filterName="UserLoginFilter",urlPatterns={"/*"},initParams={@WebInitParam(name="encoding",value="utf-8")})
+@WebFilter(filterName="EncodeFilter",urlPatterns={"/*"},initParams={@WebInitParam(name="encoding",value="utf-8")})
 public class EncodeFilter implements Filter {
     private FilterConfig config;
     public void destroy() {
